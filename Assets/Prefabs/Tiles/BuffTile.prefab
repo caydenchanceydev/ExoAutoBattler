@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &3509534366692095490
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2857523604968671434, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 4f9ac7072cb1afd4996ff9a3d90039f0, type: 2}
+    - target: {fileID: 4029835772036936613, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029835772036936613, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029835772036936613, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -20
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029835772036936613, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029835772036936613, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029835772036936613, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029835772036936613, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029835772036936613, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029835772036936613, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029835772036936613, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029835772036936613, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4029835772036936613, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4370473937853491487, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+      propertyPath: m_Name
+      value: BuffTile
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 4297869433434329744, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+  m_SourcePrefab: {fileID: 100100000, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+--- !u!1 &5413472890388867065 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8904982061004149243, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+  m_PrefabInstance: {fileID: 3509534366692095490}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4791240813767421972
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5413472890388867065}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 593cbeb135466db4991659059386b2ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  occupiedCollider: {fileID: 8040358206220555074}
+  hoverMeshRenderer: {fileID: 8187533474228843655}
+  neighborFinder: []
+  neighborControllers: []
+  isOccupied: 0
+  occupyingUnit: {fileID: 0}
+  invisibleHoverMaterial: {fileID: 2100000, guid: 38dd54426928af346ae1585af149f8bd, type: 2}
+  validHoverMaterial: {fileID: 2100000, guid: 40656e96a299aa64991363af7547580b, type: 2}
+  invalidHoverMaterial: {fileID: 2100000, guid: fe8a0c2ba5eb5f64d8daf6c999c87e24, type: 2}
+  buffBehavior: 0
+  isSpawned: 0
+--- !u!65 &8040358206220555074 stripped
+BoxCollider:
+  m_CorrespondingSourceObject: {fileID: 6854841307833656640, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+  m_PrefabInstance: {fileID: 3509534366692095490}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &8187533474228843655 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4696032549987844741, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+  m_PrefabInstance: {fileID: 3509534366692095490}
+  m_PrefabAsset: {fileID: 0}

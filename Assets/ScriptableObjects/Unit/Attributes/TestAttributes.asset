@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c13b139913530b469fc7d5ad38d783b, type: 3}
+  m_Name: TestAttributes
+  m_EditorClassIdentifier: 
+  unitName: Tester
+  unitCost: 1
+  unitCategory: 0
+  unitDescription: Tester Unit
+  unitBaseHealth: 100
+  unitBaseMana: 100
+  unitBehaviors: {fileID: 11400000, guid: b046979c7726a734ab6e5bdabf9fd145, type: 2}
