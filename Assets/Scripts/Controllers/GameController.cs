@@ -13,7 +13,8 @@ namespace ExoDev.AutoBattler
         [Title("Test Variables")]
 
         public GameObject testUnitPrefab;
-        [SerializeField] bool testFlipper;
+        public GameObject testEnemyUnitPrefab;
+        [SerializeField] bool spawnTestUnits;
 
         public enum GameStates { Idle, PreBattle, Battle, BattleOver }
 
@@ -24,6 +25,8 @@ namespace ExoDev.AutoBattler
         public GameObject unitHolder;
 
         public BoardController currentBoard;
+        public BenchController UserBench;
+        public BenchController EnemyBench;
 
         public GameObject mousePoint;
 
@@ -107,10 +110,11 @@ namespace ExoDev.AutoBattler
 
         private void GamePreBattle() 
         {
-            if (testFlipper)
+            if (spawnTestUnits)
             {
-                SpawnTesters();
-                testFlipper = false;
+                SpawnUnitPrefab(testUnitPrefab);
+                SpawnUnitPrefab(testEnemyUnitPrefab);
+                spawnTestUnits = false;
             }
         }
 
@@ -121,17 +125,24 @@ namespace ExoDev.AutoBattler
         #endregion
         #region Test Methods
 
-        private void SpawnTesters()
+        private void SpawnUnitPrefab(GameObject prefab)
         {
             GameObject tempGO;
             int tempRand;
 
-            for (int i = 0; i < 2; i++) 
+            if (prefab.GetComponentInChildren<UnitController>().currentTeam == UnitTeams.User)
             {
-                tempRand = Random.Range(0, BoardController.Instance.AllTiles.Count);
+                tempRand = Random.Range(0, UserBench.benchTiles.Count);
 
-                tempGO = Instantiate<GameObject>(testUnitPrefab, unitHolder.transform);
-                tempGO.transform.position += BoardController.Instance.AllTiles[tempRand].transform.position;
+                tempGO = Instantiate<GameObject>(prefab, unitHolder.transform);
+                tempGO.transform.position += UserBench.benchTiles[tempRand].transform.position;
+            }
+            else 
+            {
+                tempRand = Random.Range(0, EnemyBench.benchTiles.Count);
+
+                tempGO = Instantiate<GameObject>(prefab, unitHolder.transform);
+                tempGO.transform.position += EnemyBench.benchTiles[tempRand].transform.position;
             }
         }
 
