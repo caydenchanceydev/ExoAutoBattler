@@ -46,8 +46,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c35a947b08ce9d4f98816df448021ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  unitHolder: {fileID: 7562438064438240986}
   testUnitPrefab: {fileID: 2866268076061946404, guid: 2ae3ef8cdb84f1d43bc0d88ee6470040, type: 3}
+  testEnemyUnitPrefab: {fileID: 4149602298963853812, guid: b63d8502d64ede04eb7ae577fbaa19d1, type: 3}
+  spawnTestUnits: 0
+  unitHolder: {fileID: 7562438064438240986}
   currentBoard: {fileID: 0}
   mousePoint: {fileID: 2599465731652831214}
   currentState: 0

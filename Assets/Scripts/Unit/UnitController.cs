@@ -12,7 +12,7 @@ namespace ExoDev.AutoBattler
         #region Variables
 
         [Title("Test Variables")]
-        [SerializeField] bool testFlipper;
+        [SerializeField] bool findTarget, findPath;
         [SerializeField] float testDamage;
 
         public enum UnitCategories { Test, Tank, DPS, Support }
@@ -43,8 +43,7 @@ namespace ExoDev.AutoBattler
         [ReadOnly] public float currentHealth = 0.0f;
         [ReadOnly] public float currentMana = 0.0f;
 
-        //[ReadOnly] 
-        public GameController.UnitTeams currentTeam;
+        [ReadOnly] public GameController.UnitTeams currentTeam;
 
         UnitStates lastState;
         [ReadOnly] public UnitStates currentState;
@@ -99,25 +98,36 @@ namespace ExoDev.AutoBattler
 
         private void Update()
         {
-            if (testFlipper)
+            if (findTarget)
             {
-                //ChangeState(UnitStates.Attack);
                 attackRangeColliderRadius =  attackRangeStart + ((unitAttributes.unitBehaviors.unitAttackRange + 1) * 2);
                 BoardController.Instance.UpdateAllTilesList();
                 currentTarget = FindClosestTarget(BoardController.Instance.allOccupyingObjects);
-                testFlipper = false;
+                findTarget = false;
             }
 
-            if (currentTarget != null) 
+            if (currentTarget != null)
             {
                 distanceToCurrentTarget = Vector3.Distance(gameObject.transform.position, currentTarget.transform.position);
                 hexDistanceToTarget = FloatToHexDistance(distanceToCurrentTarget);
+            }
+
+            if (findPath) 
+            {
+                BoardController.Instance.ResetAllTilesHighlight();
 
                 if (currentTarget.GetComponent<UnitController>().currentTile != null)
                 {
                     currentTargetTile = currentTarget.GetComponent<UnitController>().currentTile;
                     pathToCurrentTarget = FindPathToHex(currentTargetTile);
+
+                    foreach (TileController tile in pathToCurrentTarget) 
+                    {
+                        tile.UpdateHoverMaterial();
+                    }
                 }
+
+                findPath = false;
             }
 
             if (!isDead)
