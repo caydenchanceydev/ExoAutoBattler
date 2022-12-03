@@ -71,6 +71,14 @@ namespace ExoDev.AutoBattler
             UpdateAllUnitsList();
         }
 
+        public void ResetAllTilesHighlight() 
+        {
+            foreach (TileController tile in AllTiles) 
+            {
+                tile.UpdateHoverMaterial(invisible:true);
+            }
+        }
+
         #endregion
         #region Private Methods
 

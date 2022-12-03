@@ -12,6 +12,9 @@ namespace ExoDev.AutoBattler
 
         [Title("Assigned Variables")]
 
+        [Title("Base", horizontalLine: false)]
+        public GameObject parentObject;
+
         [Title("Interaction", horizontalLine: false)]
         public BoxCollider occupiedCollider;
 

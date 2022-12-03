@@ -66,6 +66,11 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 4297869433434329744, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+--- !u!1 &3315636373643105075 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4370473937853491487, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
+  m_PrefabInstance: {fileID: 1343351777369569836}
+  m_PrefabAsset: {fileID: 0}
 --- !u!65 &5586084815676497772 stripped
 BoxCollider:
   m_CorrespondingSourceObject: {fileID: 6854841307833656640, guid: c322186d2b409644d91d32ad6440d98c, type: 3}
@@ -93,6 +98,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 463c93b9f9195a9428bb03e14ac58d15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  parentObject: {fileID: 3315636373643105075}
   occupiedCollider: {fileID: 5586084815676497772}
   hoverMeshRenderer: {fileID: 6021070722283223209}
   neighborFinder: []
