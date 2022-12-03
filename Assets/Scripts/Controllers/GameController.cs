@@ -136,7 +136,6 @@ namespace ExoDev.AutoBattler
 
                 tempGO = Instantiate<GameObject>(prefab, unitHolder.transform);
                 tempGO.transform.position += UserBench.benchTiles[tempRand].transform.position;
-                //tempGO.GetComponent<TileController>().isOccupied = true;
             }
             else 
             {
@@ -144,7 +143,6 @@ namespace ExoDev.AutoBattler
 
                 tempGO = Instantiate<GameObject>(prefab, unitHolder.transform);
                 tempGO.transform.position += EnemyBench.benchTiles[tempRand].transform.position;
-                //tempGO.GetComponent<TileController>().isOccupied = true;
             }
         }
 
