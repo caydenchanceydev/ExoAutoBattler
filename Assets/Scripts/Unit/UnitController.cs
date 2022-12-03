@@ -64,8 +64,10 @@ namespace ExoDev.AutoBattler
 
         [Title("Combat", horizontalLine: false)]
         [ReadOnly] public GameObject currentTarget;
+        [SerializeField, ReadOnly] TileController currentTargetTile;
         [SerializeField, ReadOnly] float distanceToCurrentTarget;
         [SerializeField, ReadOnly] int hexDistanceToTarget;
+        [SerializeField, ReadOnly] List<TileController> pathToCurrentTarget;
 
         [SerializeField, ReadOnly] float attackRangeColliderRadius;
         [SerializeField, ReadOnly] Collider[] targetCollidersInRange;
@@ -110,6 +112,12 @@ namespace ExoDev.AutoBattler
             {
                 distanceToCurrentTarget = Vector3.Distance(gameObject.transform.position, currentTarget.transform.position);
                 hexDistanceToTarget = FloatToHexDistance(distanceToCurrentTarget);
+
+                if (currentTarget.GetComponent<UnitController>().currentTile != null)
+                {
+                    currentTargetTile = currentTarget.GetComponent<UnitController>().currentTile;
+                    pathToCurrentTarget = FindPathToHex(currentTargetTile);
+                }
             }
 
             if (!isDead)
@@ -460,6 +468,55 @@ namespace ExoDev.AutoBattler
             }
 
             return closestInteract;
+        }
+
+        private List<TileController> FindPathToHex(TileController pathEnd) 
+        {
+            List<TileController> tempList = new();
+            TileController thisTile, nextTile;
+
+            thisTile = currentTile;
+            nextTile = FindClosestNeighborToPath(thisTile, pathEnd);
+
+            if (nextTile != pathEnd)
+            {
+                tempList.Add(nextTile);
+            }
+
+            for (int i = 0; i < hexDistanceToTarget - 1; i++) 
+            {
+                thisTile = nextTile;
+                nextTile = FindClosestNeighborToPath(thisTile, pathEnd);
+
+                if (nextTile != pathEnd)
+                {
+                    tempList.Add(nextTile);
+                }
+            }
+
+            return tempList;
+        }
+
+        private TileController FindClosestNeighborToPath(TileController tileToSearch, TileController pathEnd)
+        {
+            TileController tempTile = null;
+            float tempDistance = 10000.0f;
+            float shortestDistance = 0.0f;
+
+            if (tileToSearch.neighborControllers.Count > 0) 
+            {
+                foreach (TileController neighbor in tileToSearch.neighborControllers) 
+                {
+                    shortestDistance = Mathf.Abs(Vector3.Distance(pathEnd.parentObject.transform.position, neighbor.parentObject.transform.position));
+                    if (shortestDistance < tempDistance) 
+                    {
+                        tempDistance = shortestDistance;
+                        tempTile = neighbor;
+                    }
+                }
+            }
+
+            return tempTile;
         }
 
         #endregion
