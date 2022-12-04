@@ -158,8 +158,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fda066ae13b0c144b94135dab196a74a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testFlipper: 0
+  findTarget: 0
+  findPath: 0
+  moveToHex: 0
   testDamage: 10
+  moveToThisHex: {fileID: 0}
+  moveTime: 0.5
   unitAttributes: {fileID: 0}
   deadMaterial: {fileID: 2100000, guid: 70011e2d5e8f5a04ea8c4bc97ed7e9bd, type: 2}
   hurtMaterial: {fileID: 2100000, guid: fd1c7c29ac0bb414ca2be9bd4e512776, type: 2}
@@ -174,17 +178,21 @@ MonoBehaviour:
   currentState: 0
   lastTile: {fileID: 0}
   currentTile: {fileID: 0}
+  movingToHex: 0
+  atTargetHex: 0
   isDead: 0
   defaultMaterial: {fileID: 0}
   hurtTime: 0.5
   onMouse: 0
   currentTarget: {fileID: 0}
+  currentTargetTile: {fileID: 0}
   distanceToCurrentTarget: 0
   hexDistanceToTarget: 0
+  pathToCurrentTarget: []
+  currentTargetKilled: 0
   attackRangeColliderRadius: 0
   targetCollidersInRange: []
   targetsInRange: []
-  thisHexChecked: 0
   allTargetColliders: []
   allTargets: []
   floatToHexErrorRange: 0.5
