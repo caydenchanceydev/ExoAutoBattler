@@ -14,7 +14,6 @@ namespace ExoDev.AutoBattler
 
         public GameObject testUnitPrefab;
         public GameObject testEnemyUnitPrefab;
-        [SerializeField] bool spawnTestUnits;
 
         public enum GameStates { Idle, PreBattle, Battle, BattleOver }
 
@@ -110,13 +109,7 @@ namespace ExoDev.AutoBattler
 
         private void GamePreBattle() 
         {
-            if (spawnTestUnits)
-            {
-                SpawnUnitPrefab(testUnitPrefab);
-                SpawnUnitPrefab(testEnemyUnitPrefab);
-                SpawnUnitPrefab(testEnemyUnitPrefab);
-                spawnTestUnits = false;
-            }
+
         }
 
         private void GameBattle() { }
@@ -125,6 +118,13 @@ namespace ExoDev.AutoBattler
 
         #endregion
         #region Test Methods
+
+        public void SpawnTesters() 
+        {
+            SpawnUnitPrefab(testUnitPrefab);
+            SpawnUnitPrefab(testEnemyUnitPrefab);
+            SpawnUnitPrefab(testEnemyUnitPrefab);
+        }
 
         private void SpawnUnitPrefab(GameObject prefab)
         {
