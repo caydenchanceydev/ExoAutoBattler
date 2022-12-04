@@ -114,6 +114,7 @@ namespace ExoDev.AutoBattler
             {
                 SpawnUnitPrefab(testUnitPrefab);
                 SpawnUnitPrefab(testEnemyUnitPrefab);
+                SpawnUnitPrefab(testEnemyUnitPrefab);
                 spawnTestUnits = false;
             }
         }

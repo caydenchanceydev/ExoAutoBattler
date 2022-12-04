@@ -12,8 +12,13 @@ namespace ExoDev.AutoBattler
         #region Variables
 
         [Title("Test Variables")]
-        [SerializeField] bool findTarget, findPath;
+        [SerializeField] bool findTarget;
+        [SerializeField] bool findPath;
+        [SerializeField] bool moveToHex;
+        [SerializeField] bool startAttackCycle;
         [SerializeField] float testDamage;
+        [SerializeField] TileController moveToThisHex;
+        [SerializeField] float moveTime;
 
         public enum UnitCategories { Test, Tank, DPS, Support }
 
@@ -51,6 +56,12 @@ namespace ExoDev.AutoBattler
         [SerializeField, ReadOnly] TileController lastTile;
         [ReadOnly] public TileController currentTile;
 
+        [Title("Movement", horizontalLine: false)]
+        [ReadOnly] public TileController targetHex;
+        [ReadOnly] public int hexesAlongPath;
+        [ReadOnly] public bool movingToHex;
+        [ReadOnly] public bool atTargetHex;
+
         [Title("Damage", horizontalLine: false)]
         [ReadOnly] public bool isDead;
         [ReadOnly] MeshRenderer unitMeshRenderer;
@@ -62,16 +73,20 @@ namespace ExoDev.AutoBattler
         [ReadOnly] public bool onMouse;
 
         [Title("Combat", horizontalLine: false)]
+        [SerializeField, ReadOnly] GameObject targetCheck;
         [ReadOnly] public GameObject currentTarget;
+        
+        [SerializeField, ReadOnly] bool checkedStartingHex;
         [SerializeField, ReadOnly] TileController currentTargetTile;
         [SerializeField, ReadOnly] float distanceToCurrentTarget;
         [SerializeField, ReadOnly] int hexDistanceToTarget;
         [SerializeField, ReadOnly] List<TileController> pathToCurrentTarget;
 
+        [SerializeField, ReadOnly] bool currentTargetKilled;
+
         [SerializeField, ReadOnly] float attackRangeColliderRadius;
         [SerializeField, ReadOnly] Collider[] targetCollidersInRange;
         [ReadOnly] public List<GameObject> targetsInRange;
-        [SerializeField, ReadOnly] bool thisHexChecked;
 
         [SerializeField, ReadOnly] Collider[] allTargetColliders;
         [ReadOnly] public List<GameObject> allTargets;
@@ -110,6 +125,11 @@ namespace ExoDev.AutoBattler
             {
                 distanceToCurrentTarget = Vector3.Distance(gameObject.transform.position, currentTarget.transform.position);
                 hexDistanceToTarget = FloatToHexDistance(distanceToCurrentTarget);
+                
+                if (currentTarget.GetComponent<UnitController>().currentState == UnitStates.Grabbed) 
+                {
+                    BoardController.Instance.ResetAllTilesHighlight();
+                }
             }
 
             if (findPath) 
@@ -128,6 +148,19 @@ namespace ExoDev.AutoBattler
                 }
 
                 findPath = false;
+            }
+
+            if (moveToHex) 
+            {
+                StartCoroutine(UnitMoveToHex(moveToThisHex, moveTime));
+                moveToHex = false;
+            }
+
+            if (startAttackCycle) 
+            {
+                BoardController.Instance.UpdateAllTilesList();
+                ChangeState(UnitStates.Attack);
+                startAttackCycle = false;
             }
 
             if (!isDead)
@@ -205,54 +238,92 @@ namespace ExoDev.AutoBattler
         {
             if (!isDead)
             {
-                lastState = currentState;
+                //if (newState == UnitStates.Grabbed && GameController.Instance.currentState != GameController.GameStates.Battle)
+                //{
+                    lastState = currentState;
 
-                switch (newState)
-                {
-                    case UnitStates.Idle:
-                        if (lastState == UnitStates.Grabbed)
-                        {
-                            if (currentTile != null && !currentTile.isOccupied)
+                    switch (newState)
+                    {
+                        case UnitStates.Idle:
+                            if (lastState == UnitStates.Grabbed)
                             {
-                                MoveUnitToTile();
+                                if (currentTile != null && !currentTile.isOccupied)
+                                {
+                                    MoveUnitToTileFromGrabbed();
+                                }
+                                else
+                                {
+                                    MoveUnitToTileFromGrabbed(SendToLastTile: true);
+                                }
+                            }
+
+                            currentState = newState;
+                            break;
+
+                        case UnitStates.Grabbed:
+
+                            transform.parent = GameController.Instance.mousePoint.transform;
+                            transform.position += new Vector3(0, grabbedHeightOffset, 0);
+
+                            currentState = newState;
+                            break;
+
+                        case UnitStates.Move:
+
+                            targetCheck = FindClosestTarget(BoardController.Instance.allOccupyingObjects);
+                            hexesAlongPath = 0;
+
+                            if (targetCheck != null && pathToCurrentTarget.Count > 0)
+                            {
+                                movingToHex = true;
+                                StartCoroutine(UnitMoveToHex(pathToCurrentTarget[hexesAlongPath], 0.5f));
                             }
                             else
                             {
-                                MoveUnitToTile(SendToLastTile: true);
+                                ChangeState(UnitStates.Idle);
+                                break;
                             }
-                        }
 
-                        currentState = newState;
-                        break;
+                            currentState = newState;
+                            break;
 
-                    case UnitStates.Grabbed:
-                        currentState = newState;
+                        case UnitStates.Attack:
 
-                        transform.parent = GameController.Instance.mousePoint.transform;
-                        transform.position += new Vector3(0, grabbedHeightOffset, 0);
-                        break;
+                            if (!checkedStartingHex)
+                            {
+                                currentTargetKilled = true;
+                                targetCheck = FindClosestTarget(BoardController.Instance.allOccupyingObjects);
+                                checkedStartingHex = true;
+                            }
 
-                    case UnitStates.Move:
-                        thisHexChecked = false;
+                            if (FloatToHexDistance(Vector3.Distance(gameObject.transform.position, targetCheck.transform.position)) <= unitAttributes.unitBehaviors.unitAttackRange)
+                            {
+                                if (currentTargetKilled)
+                                {
+                                    currentTarget = targetCheck;
+                                    currentTargetKilled = false;
+                                }
 
-                        currentState = newState;
+                                StartCoroutine(AttackTarget(currentTarget));
+                            }
+                            else
+                            {
+                                ChangeState(UnitStates.Move);
+                                break;
+                            }
 
-                        break;
+                            currentState = newState;
+                            break;
 
-                    case UnitStates.Attack:
-                        //Handle attacking from starting hex
-                        if (CheckForTargetInRange() != null)
-                        {
-                            StartCoroutine(AttackAllTargetsInRange());
-                        }
-
-                        currentState = newState;
-                        break;
-
-                    default:
-                        ConsoleLogPlus("Unknown Unit State: " + currentState + ", Unit: " + gameObject.name);
-                        break;
-                }
+                        default:
+                            ConsoleLogPlus("Unknown Unit State: " + currentState + ", Unit: " + gameObject.name);
+                            break;
+                    }
+                //}
+                //else 
+                //{
+                //    ConsoleLogPlus("Cannot grab unit during battle. (Current game state: " + GameController.Instance.currentState + ")");
+                //}
             }
             else 
             {
@@ -330,19 +401,34 @@ namespace ExoDev.AutoBattler
 
         private void UnitMove() 
         {
-            //find next closest target
-            //calculate how far needed to move (distance between this and enemy -> hexes - attack range) 
-                //integer divide distance by 5 and add one then multiply by 5 for distance in hexes away from player tile to unit tile
-            //get what hex to move to (choose closest tile in line, same matching distance rules as below)
-            //choose closest hex to the straight path (if same always choose hex that is closest to the enemy main objective)
-            //move to hex
-            //while not at destination, move to next hex
-            //once at hex, switch to attck
+            if (!movingToHex)
+            {
+                hexesAlongPath++;
+
+                if (FloatToHexDistance(Vector3.Distance(gameObject.transform.position, targetCheck.transform.position)) <= unitAttributes.unitBehaviors.unitAttackRange)
+                {
+                    if (!targetCheck.GetComponent<UnitController>().isDead)
+                    {
+                        //go back to attack
+                        ChangeState(UnitStates.Attack);
+                    }
+                    else 
+                    {
+                        ChangeState(UnitStates.Idle);
+                    }
+                }
+                else 
+                {
+                    //move to next tile
+                    movingToHex = true;
+                    StartCoroutine(UnitMoveToHex(pathToCurrentTarget[hexesAlongPath], 0.5f));
+                }
+            }
         }
 
         private void UnitAttack() 
         {
-            if (thisHexChecked && targetsInRange.Count == 0) 
+            if (currentTargetKilled) 
             {
                 ChangeState(UnitStates.Move);
             }
@@ -361,7 +447,7 @@ namespace ExoDev.AutoBattler
             unitMeshRenderer.material = defaultMaterial;
         }
 
-        private void MoveUnitToTile(bool SendToLastTile = false) 
+        private void MoveUnitToTileFromGrabbed(bool SendToLastTile = false) 
         {
             TileController targetTile;
 
@@ -375,12 +461,39 @@ namespace ExoDev.AutoBattler
             transform.parent = GameController.Instance.unitHolder.transform;
             transform.position = targetTile.transform.position + new Vector3(0, tileHeightOffset, 0);
 
-            targetTile.UpdateOccupiedUnit(gameObject);
             lastTile.UpdateOccupiedUnit(null);
+            targetTile.UpdateOccupiedUnit(gameObject);
 
             targetTile.UpdateHoverMaterial(invisible:true);
 
             currentTile = targetTile;
+        }
+
+        private IEnumerator UnitMoveToHex(TileController endTile, float timeToMove) 
+        {
+            movingToHex = true;
+            float time = 0.0f;
+
+            Vector3 startPos = transform.position;
+
+            while (time < timeToMove) 
+            {
+                transform.position = Vector3.Lerp(startPos, endTile.parentObject.transform.position + new Vector3(0, tileHeightOffset, 0), time / timeToMove);
+                time += Time.deltaTime;
+                yield return null;
+            }
+
+            transform.position = endTile.parentObject.transform.position + new Vector3(0, tileHeightOffset, 0);
+
+            lastTile = currentTile;
+            lastTile.isOccupied = false;
+            lastTile.occupyingUnit = gameObject;
+
+            currentTile = endTile;
+            currentTile.isOccupied = true;
+            currentTile.occupyingUnit = gameObject;
+
+            movingToHex = false;
         }
 
         private IEnumerator AttackAllTargetsInRange() 
@@ -395,17 +508,39 @@ namespace ExoDev.AutoBattler
 
         private IEnumerator AttackTarget(GameObject target) 
         {
-            UnitController tempUnitHolder = null;
+            //need to handle target moving out of attack range during attack, for now attack them no matter where they go
+            //movingToHex = false;
 
-            if (target.TryGetComponent<UnitController>(out tempUnitHolder)) 
+            if (target.TryGetComponent<UnitController>(out UnitController tempUnitHolder))
             {
                 while (tempUnitHolder.currentHealth > 0)
                 {
-                    ConsoleLogPlus("Unit " + gameObject.name + "attacked " + tempUnitHolder.name + " for " + testDamage + " damage");
+                    //if (FloatToHexDistance(Vector3.Distance(gameObject.transform.position, targetCheck.transform.position)) <= unitAttributes.unitBehaviors.unitAttackRange)
+                    //{
+                        ConsoleLogPlus("Unit " + gameObject.name + "attacked " + tempUnitHolder.name + " for " + testDamage + " damage");
 
-                    tempUnitHolder.TakeDamage(testDamage);
-                    yield return StartCoroutine(Wait(1.0f/unitAttributes.unitBehaviors.unitAttackSpeed));
+                        tempUnitHolder.TakeDamage(testDamage);
+                        yield return StartCoroutine(Wait(1.0f / unitAttributes.unitBehaviors.unitAttackSpeed));
+                    //}
+
+                    /*else
+                    {
+                        //follow target
+
+                        //ChangeState(UnitStates.Move);
+                        //yield return null;
+                        
+                        while (FloatToHexDistance(Vector3.Distance(gameObject.transform.position, targetCheck.transform.position)) <= unitAttributes.unitBehaviors.unitAttackRange)
+                        {
+                            while (!movingToHex)
+                            {
+                                StartCoroutine(UnitMoveToHex(FindClosestNeighborToPath(currentTile, tempUnitHolder.currentTile), 0.5f));
+                            }
+                        }
+                    }*/
                 }
+
+                currentTargetKilled = true;
             }
 
             yield return null;
@@ -413,8 +548,7 @@ namespace ExoDev.AutoBattler
 
         private GameObject CheckForTargetInRange() 
         {
-            GameObject target = null;
-            UnitController tempHolder = null;
+            GameObject target;
             bool targetFound = false;
 
             targetCollidersInRange = Physics.OverlapSphere(gameObject.transform.position, attackRangeStart + ((unitAttributes.unitBehaviors.unitAttackRange + 1) * 2), layerMask:1<<7, queryTriggerInteraction:QueryTriggerInteraction.Collide);
@@ -423,7 +557,7 @@ namespace ExoDev.AutoBattler
             {
                 foreach (Collider potentialTarget in targetCollidersInRange)
                 {
-                    if (potentialTarget.TryGetComponent<UnitController>(out tempHolder))
+                    if (potentialTarget.TryGetComponent<UnitController>(out UnitController tempHolder))
                     {
                         if (tempHolder.currentTeam != currentTeam) 
                         {
@@ -445,15 +579,14 @@ namespace ExoDev.AutoBattler
 
             currentTarget = target;
 
-            thisHexChecked = true;
-
             return target;
         }
 
         private GameObject FindClosestTarget(List<GameObject> targets) 
         {
             GameObject closestInteract = null;
-            float closestDistance = 0.0f, tempDistance = 0.0f;
+            UnitController tempUnit;
+            float closestDistance = 0.0f;
 
             foreach (GameObject potentialTarget in targets)
             {
@@ -461,20 +594,38 @@ namespace ExoDev.AutoBattler
                 {
                     if (closestInteract != null)
                     {
-                        tempDistance = Mathf.Abs(Vector3.Distance(gameObject.transform.position, potentialTarget.gameObject.transform.position));
-
-                        if (tempDistance < closestDistance)
+                        if (potentialTarget.TryGetComponent<UnitController>(out tempUnit))
                         {
-                            closestInteract = potentialTarget;
-                            closestDistance = tempDistance;
+                            if (!tempUnit.isDead && tempUnit.currentTeam != currentTeam)
+                            {
+                                float tempDistance = Mathf.Abs(Vector3.Distance(gameObject.transform.position, potentialTarget.gameObject.transform.position));
+
+                                if (tempDistance < closestDistance)
+                                {
+                                    closestInteract = potentialTarget;
+                                    closestDistance = tempDistance;
+                                }
+                            }
                         }
                     }
                     else
                     {
-                        closestInteract = potentialTarget;
-                        closestDistance = Mathf.Abs(Vector3.Distance(gameObject.transform.position, potentialTarget.gameObject.transform.position));
+                        if (potentialTarget.TryGetComponent<UnitController>(out tempUnit))
+                        {
+                            if (!tempUnit.isDead && tempUnit.currentTeam != currentTeam)
+                            {
+                                closestInteract = potentialTarget;
+                                closestDistance = Mathf.Abs(Vector3.Distance(gameObject.transform.position, potentialTarget.gameObject.transform.position));
+                            }
+                        }
                     }
                 }
+            }
+
+            if (closestInteract != null) 
+            {
+                targetHex = closestInteract.GetComponent<UnitController>().currentTile;
+                pathToCurrentTarget = FindPathToHex(targetHex);
             }
 
             return closestInteract;
@@ -492,6 +643,9 @@ namespace ExoDev.AutoBattler
             {
                 tempList.Add(nextTile);
             }
+
+            distanceToCurrentTarget = Vector3.Distance(gameObject.transform.position, pathEnd.occupyingUnit.transform.position);
+            hexDistanceToTarget = FloatToHexDistance(distanceToCurrentTarget);
 
             for (int i = 0; i < hexDistanceToTarget - 1; i++) 
             {
